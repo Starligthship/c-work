@@ -1,0 +1,233 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_CONTAS 100
+
+typedef struct {
+    int numero;
+    char nome[50];
+    char cpf[15];
+    char telefone[15];
+    float saldo;
+} Conta;
+
+int buscar_conta(Conta cadastro[], int tamanho, int numero_conta) {
+    if (tamanho == 0) {
+        return -1;
+    }
+    
+    for (int i = 0; i < tamanho; i++) {
+        if (cadastro[i].numero == numero_conta) {
+            return i;
+        }
+    }
+    
+    return -2;
+}
+
+void cadastrar_conta(Conta cadastro[], int *tamanho) {
+    if (*tamanho >= MAX_CONTAS) {
+        printf("Cadastro cheio! Não é possível adicionar mais contas.\n");
+        return;
+    }
+    
+    int numero_conta;
+    printf("Digite o número da conta: ");
+    scanf("%d", &numero_conta);
+    
+    int posicao = buscar_conta(cadastro, *tamanho, numero_conta);
+    if (posicao >= 0) {
+        printf("Erro: Número de conta já existe no cadastro!\n");
+        return;
+    }
+    
+    cadastro[*tamanho].numero = numero_conta;
+    
+    printf("Digite o nome do cliente: ");
+    scanf(" %[^\n]", cadastro[*tamanho].nome);
+    
+    printf("Digite o CPF do cliente: ");
+    scanf(" %[^\n]", cadastro[*tamanho].cpf);
+    
+    printf("Digite o telefone de contato: ");
+    scanf(" %[^\n]", cadastro[*tamanho].telefone);
+    
+    printf("Digite o saldo inicial: ");
+    scanf("%f", &cadastro[*tamanho].saldo);
+    
+    (*tamanho)++;
+    printf("Conta cadastrada com sucesso!\n");
+}
+
+void consultar_saldo(Conta cadastro[], int tamanho) {
+    int numero_conta;
+    printf("Digite o número da conta: ");
+    scanf("%d", &numero_conta);
+    
+    int posicao = buscar_conta(cadastro, tamanho, numero_conta);
+    
+    if (posicao == -1) {
+        printf("Cadastro vazio!\n");
+    } else if (posicao == -2) {
+        printf("Conta não encontrada!\n");
+    } else {
+        printf("Saldo da conta %d: R$ %.2f\n", numero_conta, cadastro[posicao].saldo);
+    }
+}
+
+void fazer_deposito(Conta cadastro[], int tamanho) {
+    int numero_conta;
+    printf("Digite o número da conta: ");
+    scanf("%d", &numero_conta);
+    
+    int posicao = buscar_conta(cadastro, tamanho, numero_conta);
+    
+    if (posicao == -1) {
+        printf("Cadastro vazio!\n");
+    } else if (posicao == -2) {
+        printf("Conta não encontrada!\n");
+    } else {
+        float valor;
+        printf("Digite o valor do depósito: ");
+        scanf("%f", &valor);
+        
+        if (valor > 0) {
+            cadastro[posicao].saldo += valor;
+            printf("Depósito de R$ %.2f realizado com sucesso!\n", valor);
+            printf("Novo saldo: R$ %.2f\n", cadastro[posicao].saldo);
+        } else {
+            printf("Valor de depósito inválido!\n");
+        }
+    }
+}
+
+void fazer_saque(Conta cadastro[], int tamanho) {
+    int numero_conta;
+    printf("Digite o número da conta: ");
+    scanf("%d", &numero_conta);
+    
+    int posicao = buscar_conta(cadastro, tamanho, numero_conta);
+    
+    if (posicao == -1) {
+        printf("Cadastro vazio!\n");
+    } else if (posicao == -2) {
+        printf("Conta não encontrada!\n");
+    } else {
+        float valor;
+        printf("Digite o valor do saque: ");
+        scanf("%f", &valor);
+        
+        if (valor <= 0) {
+            printf("Valor de saque inválido!\n");
+        } else if (cadastro[posicao].saldo >= valor) {
+            cadastro[posicao].saldo -= valor;
+            printf("Saque de R$ %.2f realizado com sucesso!\n", valor);
+            printf("Novo saldo: R$ %.2f\n", cadastro[posicao].saldo);
+        } else {
+            printf("Saldo insuficiente! Saldo atual: R$ %.2f\n", cadastro[posicao].saldo);
+        }
+    }
+}
+
+void listar_contas(Conta cadastro[], int tamanho) {
+    if (tamanho == 0) {
+        printf("Cadastro vazio!\n");
+        return;
+    }
+    
+    printf("\n=== LISTA DE CONTAS ===\n");
+    for (int i = 0; i < tamanho; i++) {
+        printf("Conta: %d\n", cadastro[i].numero);
+        printf("Titular: %s\n", cadastro[i].nome);
+        printf("Telefone: %s\n", cadastro[i].telefone);
+        printf("----------------------------\n");
+    }
+}
+
+int main() {
+    Conta cadastro_corrente[MAX_CONTAS];
+    Conta cadastro_poupanca[MAX_CONTAS];
+    int tam_corrente = 0, tam_poupanca = 0;
+    int opcao, tipo_conta;
+    
+    do {
+        printf("\n=== BANCO DINHEIRO CERTO ===\n");
+        printf("1. Cadastrar conta\n");
+        printf("2. Consultar saldo\n");
+        printf("3. Fazer depósito\n");
+        printf("4. Fazer saque\n");
+        printf("5. Listar contas\n");
+        printf("0. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+        
+        if (opcao >= 1 && opcao <= 5) {
+            printf("\n1. Conta Corrente\n");
+            printf("2. Conta Poupança\n");
+            printf("Escolha o tipo de conta: ");
+            scanf("%d", &tipo_conta);
+        }
+        
+        switch (opcao) {
+            case 1:
+                if (tipo_conta == 1) {
+                    cadastrar_conta(cadastro_corrente, &tam_corrente);
+                } else if (tipo_conta == 2) {
+                    cadastrar_conta(cadastro_poupanca, &tam_poupanca);
+                } else {
+                    printf("Tipo de conta inválido!\n");
+                }
+                break;
+                
+            case 2:
+                if (tipo_conta == 1) {
+                    consultar_saldo(cadastro_corrente, tam_corrente);
+                } else if (tipo_conta == 2) {
+                    consultar_saldo(cadastro_poupanca, tam_poupanca);
+                } else {
+                    printf("Tipo de conta inválido!\n");
+                }
+                break;
+                
+            case 3:
+                if (tipo_conta == 1) {
+                    fazer_deposito(cadastro_corrente, tam_corrente);
+                } else if (tipo_conta == 2) {
+                    fazer_deposito(cadastro_poupanca, tam_poupanca);
+                } else {
+                    printf("Tipo de conta inválido!\n");
+                }
+                break;
+                
+            case 4:
+                if (tipo_conta == 1) {
+                    fazer_saque(cadastro_corrente, tam_corrente);
+                } else if (tipo_conta == 2) {
+                    fazer_saque(cadastro_poupanca, tam_poupanca);
+                } else {
+                    printf("Tipo de conta inválido!\n");
+                }
+                break;
+                
+            case 5:
+                if (tipo_conta == 1) {
+                    listar_contas(cadastro_corrente, tam_corrente);
+                } else if (tipo_conta == 2) {
+                    listar_contas(cadastro_poupanca, tam_poupanca);
+                } else {
+                    printf("Tipo de conta inválido!\n");
+                }
+                break;
+                
+            case 0:
+                printf("Saindo do sistema...\n");
+                break;
+                
+            default:
+                printf("Opção inválida!\n");
+        }
+        
+    } while (opcao != 0);
+    
+    return 0;
+}
