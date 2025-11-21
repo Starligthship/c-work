@@ -1,0 +1,69 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+void buscarNumero() {
+    FILE *arq = fopen("dados.bin", "rb");
+    if (!arq) return;
+
+    int num, x, encontrado = 0;
+    scanf("%d", &num);
+
+    while (fread(&x, sizeof(int), 1, arq))
+        if (x == num) { encontrado = 1; break; }
+
+    if (encontrado) printf("ENCONTRADO\n");
+    else printf("NAO ENCONTRADO\n");
+
+    fclose(arq);
+}
+
+void substituirNumero() {
+    FILE *arq = fopen("dados.bin", "r+b");
+    if (!arq) return;
+
+    int antigo, novo, x, encontrado = 0;
+    scanf("%d %d", &antigo, &novo);
+
+    while (fread(&x, sizeof(int), 1, arq)) {
+        if (x == antigo) {
+            encontrado = 1;
+            fseek(arq, -sizeof(int), SEEK_CUR);
+            fwrite(&novo, sizeof(int), 1, arq);
+            break;
+        }
+    }
+
+    fclose(arq);
+}
+
+void excluirNumero() {
+    FILE *orig = fopen("dados.bin", "rb");
+    if (!orig) return;
+
+    FILE *temp = fopen("temp.bin", "wb");
+
+    int excluir, x;
+    scanf("%d", &excluir);
+
+    while (fread(&x, sizeof(int), 1, orig))
+        if (x != excluir)
+            fwrite(&x, sizeof(int), 1, temp);
+
+    fclose(orig);
+    fclose(temp);
+
+    remove("dados.bin");
+    rename("temp.bin", "dados.bin");
+}
+
+int main() {
+    int opc;
+    while (1) {
+        scanf("%d", &opc);
+        if (opc == 1) buscarNumero();
+        else if (opc == 2) substituirNumero();
+        else if (opc == 3) excluirNumero();
+        else break;
+    }
+    return 0;
+}
