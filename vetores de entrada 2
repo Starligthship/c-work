@@ -1,0 +1,192 @@
+#include <stdio.h>
+#include <string.h>
+
+#define N 40   // quantidade de produtos
+
+typedef struct {
+    int codigo;
+    char descricao[50];
+    float valor;
+    int quantidade;
+} Produto;
+
+void cadastrar(Produto v[], int *pos) {
+    if (*pos >= N) return;
+
+    printf("Codigo: ");
+    scanf("%d", &v[*pos].codigo);
+
+    printf("Descricao: ");
+    scanf(" %[^\n]", v[*pos].descricao);
+
+    printf("Valor unitario: ");
+    scanf("%f", &v[*pos].valor);
+
+    printf("Quantidade em estoque: ");
+    scanf("%d", &v[*pos].quantidade);
+
+    (*pos)++;
+}
+
+// (b)
+void alterarValor(Produto v[], int pos, int codigo) {
+    int i;
+    float novo;
+    for (i = 0; i < pos; i++) {
+        if (v[i].codigo == codigo) {
+            printf("Novo valor unitario: ");
+            scanf("%f", &novo);
+            v[i].valor = novo;
+            return;
+        }
+    }
+}
+
+// (c)
+float valorDoProduto(Produto v[], int pos, int codigo) {
+    int i;
+    for (i = 0; i < pos; i++)
+        if (v[i].codigo == codigo)
+            return v[i].valor;
+    return -1;
+}
+
+// (d)
+int quantidadeProduto(Produto v[], int pos, int codigo) {
+    int i;
+    for (i = 0; i < pos; i++)
+        if (v[i].codigo == codigo)
+            return v[i].quantidade;
+    return -1;
+}
+
+// (e)
+void venda(Produto v[], int pos, int codigo, int qtdDesejada) {
+    int i;
+    for (i = 0; i < pos; i++) {
+        if (v[i].codigo == codigo) {
+
+            if (v[i].quantidade == 0) {
+                printf("Produto sem estoque!\n");
+                return;
+            }
+
+            if (qtdDesejada > v[i].quantidade) {
+                printf("Estoque insuficiente! Estoque = %d\n", v[i].quantidade);
+                printf("Deseja comprar mesmo assim? (1=sim / 0=nao): ");
+                int op; 
+                scanf("%d", &op);
+
+                if (op == 1) {
+                    float valor = v[i].quantidade * v[i].valor;
+                    printf("Compra realizada: R$ %.2f\n", valor);
+                    v[i].quantidade = 0;
+                }
+                return;
+            }
+
+            v[i].quantidade -= qtdDesejada;
+            printf("Valor a pagar: R$ %.2f\n", qtdDesejada * v[i].valor);
+            return;
+        }
+    }
+}
+
+// (f)
+void atualizarQuantidade(Produto v[], int pos, int codigo) {
+    int i, novaQtd;
+    for (i = 0; i < pos; i++) {
+        if (v[i].codigo == codigo) {
+            printf("Nova quantidade: ");
+            scanf("%d", &novaQtd);
+            v[i].quantidade = novaQtd;
+            return;
+        }
+    }
+}
+
+// (g)
+void exibirTodos(Produto v[], int pos) {
+    int i;
+    printf("\n--- LISTA DE PRODUTOS ---\n");
+    for (i = 0; i < pos; i++)
+        printf("Codigo: %d | Descricao: %s\n", v[i].codigo, v[i].descricao);
+}
+
+// (h)
+void exibirZerados(Produto v[], int pos) {
+    int i;
+    printf("\n--- PRODUTOS COM ESTOQUE ZERO ---\n");
+    for (i = 0; i < pos; i++)
+        if (v[i].quantidade == 0)
+            printf("Codigo: %d | Descricao: %s\n", v[i].codigo, v[i].descricao);
+}
+
+int main() {
+    Produto produtos[N];
+    int pos = 0, op, codigo, qtd;
+
+    do {
+        printf("\nMENU:\n");
+        printf("1 - Cadastrar produto\n");
+        printf("2 - Alterar valor unitario\n");
+        printf("3 - Consultar valor unitario\n");
+        printf("4 - Consultar quantidade em estoque\n");
+        printf("5 - Registrar venda\n");
+        printf("6 - Atualizar quantidade em estoque\n");
+        printf("7 - Exibir todos os produtos\n");
+        printf("8 - Exibir produtos com estoque zero\n");
+        printf("0 - Sair\n");
+        printf("Opcao: ");
+        scanf("%d", &op);
+
+        switch (op) {
+            case 1:
+                cadastrar(produtos, &pos);
+                break;
+
+            case 2:
+                printf("Codigo: ");
+                scanf("%d", &codigo);
+                alterarValor(produtos, pos, codigo);
+                break;
+
+            case 3:
+                printf("Codigo: ");
+                scanf("%d", &codigo);
+                printf("Valor: %.2f\n", valorDoProduto(produtos, pos, codigo));
+                break;
+
+            case 4:
+                printf("Codigo: ");
+                scanf("%d", &codigo);
+                printf("Quantidade: %d\n", quantidadeProduto(produtos, pos, codigo));
+                break;
+
+            case 5:
+                printf("Codigo: ");
+                scanf("%d", &codigo);
+                printf("Quantidade desejada: ");
+                scanf("%d", &qtd);
+                venda(produtos, pos, codigo, qtd);
+                break;
+
+            case 6:
+                printf("Codigo: ");
+                scanf("%d", &codigo);
+                atualizarQuantidade(produtos, pos, codigo);
+                break;
+
+            case 7:
+                exibirTodos(produtos, pos);
+                break;
+
+            case 8:
+                exibirZerados(produtos, pos);
+                break;
+        }
+
+    } while (op != 0);
+
+    return 0;
+}
